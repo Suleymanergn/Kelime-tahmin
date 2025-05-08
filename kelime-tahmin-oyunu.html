@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Kelime Tahmin Oyunu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3f4f6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .cell {
+      width: 60px;
+      height: 60px;
+      border: 2px solid #ccc;
+      font-size: 28px;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 60px;
+      font-weight: bold;
+      background-color: white;
+    }
+
+    .correct {
+      background-color: #10b981; /* yeşil */
+      color: white;
+      border: none;
+    }
+
+    .close {
+      background-color: #facc15; /* sarı */
+      color: white;
+      border: none;
+    }
+
+    .wrong {
+      background-color: #9ca3af; /* gri */
+      color: white;
+      border: none;
+    }
+
+    #keyboard {
+      display: grid;
+      grid-template-columns: repeat(10, 35px);
+      gap: 5px;
+      justify-content: center;
+    }
+
+    .key {
+      padding: 8px;
+      background-color: #e5e7eb;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .key:hover {
+      background-color: #d1d5db;
+    }
+
+    #message {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔤 Kelime Tahmin Oyunu</h1>
+  <div id="board" class="board"></div>
+  <div id="keyboard"></div>
+  <p id="message"></p>
+
+  <script>
+    const words = ["kavun", "ceviz", "bulut", "gizem", "araba", "sinir", "kalem", "yumur", "müzik", "diken"];
+    const target = words[Math.floor(Math.random() * words.length)];
+    let currentGuess = "";
+    let currentRow = 0;
+    const board = document.getElementById("board");
+    const keyboard = document.getElementById("keyboard");
+    const message = document.getElementById("message");
+
+    // Create grid
+    for (let i = 0; i < 30; i++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      board.appendChild(cell);
+    }
+
+    // Create keyboard
+    const keys = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ".split("");
+    keys.forEach(k => {
+      const btn = document.createElement("button");
+      btn.className = "key";
+      btn.textContent = k;
+      btn.onclick = () => addLetter(k.toLowerCase());
+      keyboard.appendChild(btn);
+    });
+    // add backspace and enter
+    const back = document.createElement("button");
+    back.textContent = "←";
+    back.className = "key";
+    back.onclick = () => removeLetter();
+    keyboard.appendChild(back);
+
+    const enter = document.createElement("button");
+    enter.textContent = "⏎";
+    enter.className = "key";
+    enter.onclick = () => checkGuess();
+    keyboard.appendChild(enter);
+
+    function addLetter(letter) {
+      if (currentGuess.length < 5) {
+        currentGuess += letter;
+        const index = currentRow * 5 + currentGuess.length - 1;
+        board.children[index].textContent = letter;
+      }
+    }
+
+    function removeLetter() {
+      if (currentGuess.length > 0) {
+        const index = currentRow * 5 + currentGuess.length - 1;
+        board.children[index].textContent = "";
+        currentGuess = currentGuess.slice(0, -1);
+      }
+    }
+
+    function checkGuess() {
+      if (currentGuess.length !== 5) {
+        message.textContent = "5 harfli bir kelime girin!";
+        return;
+      }
+
+      for (let i = 0; i < 5; i++) {
+        const index = currentRow * 5 + i;
+        const cell = board.children[index];
+        if (currentGuess[i] === target[i]) {
+          cell.classList.add("correct");
+        } else if (target.includes(currentGuess[i])) {
+          cell.classList.add("close");
+        } else {
+          cell.classList.add("wrong");
+        }
+      }
+
+      if (currentGuess === target) {
+        message.textContent = "🎉 Doğru tahmin ettiniz!";
+        disableKeyboard();
+        return;
+      }
+
+      currentRow++;
+      currentGuess = "";
+
+      if (currentRow === 6) {
+        message.textContent = `😢 Kaybettiniz! Kelime: ${target}`;
+        disableKeyboard();
+      }
+    }
+
+    function disableKeyboard() {
+      document.querySelectorAll(".key").forEach(k => k.disabled = true);
+    }
+  </script>
+
+</body>
+</html>
